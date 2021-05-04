@@ -1,0 +1,14 @@
+-------------------------------------
+|   FINAL PROJECT: FREDERIK BLAIS   |
+-------------------------------------
+
+Subject: Terrarium
+
+Sensors:    - Moisture Sensor
+            - Temperature Sensor
+            - Touch Sensor
+
+interface:  - LED Bar
+            - Button
+            - RGB Light
+            - Active buzzer
