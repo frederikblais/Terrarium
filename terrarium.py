@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 import ADC0832
 import time
- 
+
+def setup():
+	ADC0832.setup()				# Setup ADC0832
+	GPIO.setmode(GPIO.BOARD)	# Numbers GPIOs by physical location
+
 def init():
 	ADC0832.setup()
  
