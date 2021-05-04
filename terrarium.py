@@ -9,7 +9,7 @@ def loop():
 	while True:
 		res = ADC0832.getResult()
 		moisture = 255 - res
-		print 'analog value: %03d  moisture: %d' %(res, moisture)
+		print ('analog value: %03d  moisture: %d') %(res, moisture)
 		time.sleep(0.1)
  
 if __name__ == '__main__':
@@ -18,4 +18,4 @@ if __name__ == '__main__':
 		loop()
 	except KeyboardInterrupt: 
 		ADC0832.destroy()
-		print 'Exit ...'
+		print ('Exit ...')
