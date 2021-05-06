@@ -1,25 +1,48 @@
 #!/usr/bin/env python
-import ADC0832
+import os
+import glob
 import time
-
-def setup():
-	ADC0832.setup()				# Setup ADC0832
-	GPIO.setmode(GPIO.BOARD)	# Numbers GPIOs by physical location
-
-def init():
-	ADC0832.setup()
  
+os.system('modprobe w1-gpio')
+os.system('modprobe w1-therm')
+ 
+base_dir = '/sys/bus/w1/devices/'
+device_folder = glob.glob(base_dir + '28*')[0]
+device_file = device_folder + '/w1_slave'
+ 
+def read_temp_raw():
+    f = open(device_file, 'r')
+    lines = f.readlines()
+    f.close()
+    return lines
+ 
+def read_temp():
+    lines = read_temp_raw()
+    while lines[0].strip()[-3:] != 'YES':
+        time.sleep(0.2)
+        lines = read_temp_raw()
+    equals_pos = lines[1].find('t=')
+    if equals_pos != -1:
+        temp_string = lines[1][equals_pos+2:]
+        temp_c = float(temp_string) / 1000.0
+        if(temp_c > 20):
+            return "Temp - "+str(temp_c)
+        else:
+            return "TOO COLD! - "+str(temp_c)
+
+# MAIN LOOP 
 def loop():
-	while True:
-		res = ADC0832.getResult()
-		moisture = 255 - res
-		print ('analog value: %03d  moisture: %d') %(res, moisture)
-		time.sleep(0.1)
- 
+    while True:
+        print(read_temp())
+        time.sleep(1)
+        
+def destroy():
+    pass
+
 if __name__ == '__main__':
-	init()
 	try:
 		loop()
 	except KeyboardInterrupt: 
-		ADC0832.destroy()
+		destroy()
+		print('')
 		print ('Exit ...')
