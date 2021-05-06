@@ -2,6 +2,22 @@
 import os
 import glob
 import time
+import RPi.GPIO as GPIO
+
+tempButton = 21
+ledButton = 20
+led = 24
+pinDistance1 = 19
+pinDistance2 = 26
+
+def setup():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(tempButton, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+    GPIO.setup(ledButton, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    GPIO.setup(led, GPIO.OUT)
+    GPIO.output(led, GPIO.HIGH)
+    GPIO.setup(pinDistance1, GPIO.OUT, initial=GPIO.LOW)
+    GPIO.setup(pinDistance2, GPIO.IN)
  
 os.system('modprobe w1-gpio')
 os.system('modprobe w1-therm')
@@ -9,6 +25,37 @@ os.system('modprobe w1-therm')
 base_dir = '/sys/bus/w1/devices/'
 device_folder = glob.glob(base_dir + '28*')[0]
 device_file = device_folder + '/w1_slave'
+
+def checkDist():
+    GPIO.output(pinDistance1, GPIO.HIGH)
+    time.sleep(0.000015)
+    GPIO.output(pinDistance1, GPIO.LOW)
+    while not GPIO.input(pinDistance2):
+        pass
+    t1 = time.time()
+    while GPIO.input(pinDistance2):
+        pass
+    t2 = time.time()
+    dst = (t2-t1)*340/2
+    if(dst < 0.5):
+        GPIO.output(led, GPIO.LOW)
+        print('Movement detected ...')
+        print('---------------------')
+        time.sleep(5)
+        GPIO.output(led, GPIO.HIGH)
+
+    
+def ledButtonCheck():
+    if GPIO.input(ledButton) == GPIO.HIGH:
+        print("Turning light on ...")
+        print('---------------------')
+        GPIO.output(led, GPIO.LOW)
+        time.sleep(5)
+        GPIO.output(led, GPIO.HIGH)
+
+def buttonCheck():
+    if(GPIO.input(tempButton) == GPIO.LOW):
+        return print(read_temp())
  
 def read_temp_raw():
     f = open(device_file, 'r')
@@ -33,16 +80,21 @@ def read_temp():
 # MAIN LOOP 
 def loop():
     while True:
-        print(read_temp())
-        time.sleep(1)
+        buttonCheck()
+        ledButtonCheck()
+        checkDist()
+        time.sleep(0.5)
         
 def destroy():
-    pass
+    GPIO.output(led, GPIO.HIGH)
+    GPIO.cleanup()
 
 if __name__ == '__main__':
-	try:
-		loop()
-	except KeyboardInterrupt: 
-		destroy()
-		print('')
-		print ('Exit ...')
+    setup()
+    try:
+        loop()
+    except KeyboardInterrupt: 
+        destroy()
+        print('')
+        print ('Exit ...')
+        print('---------------------')
