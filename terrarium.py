@@ -39,18 +39,22 @@ def checkDist():
     dst = (t2-t1)*340/2
     if(dst < 0.5):
         GPIO.output(led, GPIO.LOW)
-        print('Movement detected ...')
-        print('---------------------')
+        print("Movement detected =>")
+        print('Turning light on ...')
         time.sleep(5)
+        print('Turning light off ...')
+        print('---------------------')
         GPIO.output(led, GPIO.HIGH)
 
     
 def ledButtonCheck():
     if GPIO.input(ledButton) == GPIO.HIGH:
+        print("Button pressed =>")
         print("Turning light on ...")
-        print('---------------------')
         GPIO.output(led, GPIO.LOW)
         time.sleep(5)
+        print('Turning light off ...')
+        print('---------------------')
         GPIO.output(led, GPIO.HIGH)
 
 def buttonCheck():
@@ -73,9 +77,12 @@ def read_temp():
         temp_string = lines[1][equals_pos+2:]
         temp_c = float(temp_string) / 1000.0
         if(temp_c > 20):
-            return "Temp - "+str(temp_c)
+            print("Temp Button detected =>")
+            print("Temp - "+str(temp_c))
+            return('---------------------')
         else:
-            return "TOO COLD! - "+str(temp_c)
+            print("TOO COLD! - "+str(temp_c))
+            print('---------------------')
 
 # MAIN LOOP 
 def loop():
@@ -92,6 +99,10 @@ def destroy():
 if __name__ == '__main__':
     setup()
     try:
+        GPIO.setwarnings(False)
+        print('--------------------------')
+        print('TERRARIUM - FREDERIK BLAIS')
+        print('--------------------------')
         loop()
     except KeyboardInterrupt: 
         destroy()
